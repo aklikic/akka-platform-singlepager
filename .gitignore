@@ -11,6 +11,7 @@
 *.iml
 *.iws
 
+.akka/
 # Mac
 .DS_Store
 
@@ -32,3 +33,9 @@ akka-context/
 .git-bak
 
 .github-bak
+
+AGENTS.md
+CLAUDE.md
+
+AAO Azure Package/
+

@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Akka Platform — Where the Value Is</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap');
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg-primary: #0f0f0f;
+    --bg-secondary: #1a1a1a;
+    --bg-card: #222222;
+    --bg-table-header: #2a2a2a;
+    --bg-table-row: #1e1e1e;
+    --bg-table-row-alt: #242424;
+    --text-primary: #f0f0f0;
+    --text-secondary: #a0a0a0;
+    --text-muted: #707070;
+    --accent: #e8e8e8;
+    --border: #333333;
+    --gradient-start: #b8d44f;
+    --gradient-mid: #3ac5c9;
+    --gradient-end: #e8405e;
+  }
+
+  html { font-size: 16px; scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Header bar */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+  .logo {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .header-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+  }
+
+  /* Gradient bar */
+  .gradient-bar {
+    height: 3px;
+    background: linear-gradient(90deg, var(--gradient-start), var(--gradient-mid), var(--gradient-end));
+  }
+
+  /* Main content */
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* Hero */
+  .hero {
+    padding: 80px 0 60px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+  }
+  .hero .subtitle {
+    font-size: 17px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    max-width: 700px;
+  }
+
+  /* Sections */
+  .section {
+    padding: 56px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .section:last-of-type {
+    border-bottom: none;
+  }
+
+  h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+  }
+  h2 .section-num {
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-right: 6px;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    color: var(--accent);
+  }
+
+  p {
+    margin-bottom: 16px;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+  p strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Lists */
+  ul {
+    margin: 12px 0 20px 0;
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+    font-size: 15px;
+  }
+  li strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+
+  /* Ordered lists for steps */
+  ol {
+    margin: 12px 0 20px 0;
+    padding-left: 20px;
+  }
+  ol li {
+    margin-bottom: 6px;
+    padding-left: 4px;
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 20px 0;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+  thead th {
+    background: var(--bg-table-header);
+    color: var(--text-primary);
+    font-weight: 600;
+    text-align: left;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  tbody td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-secondary);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  tbody tr:nth-child(even) td {
+    background: var(--bg-table-row-alt);
+  }
+  tbody tr:nth-child(odd) td {
+    background: var(--bg-table-row);
+  }
+  tbody tr:last-child td {
+    border-bottom: none;
+  }
+  td strong {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  td:first-child {
+    white-space: nowrap;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  /* Layer table special styling */
+  .layer-table td:first-child {
+    width: 120px;
+  }
+  .layer-table td:last-child {
+    width: 160px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  /* Ops table */
+  .ops-table td:first-child {
+    width: 180px;
+  }
+
+  /* Callout / closing */
+  .closing {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 32px;
+    margin: 40px 0;
+  }
+  .closing p {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+    font-size: 15px;
+    line-height: 1.8;
+  }
+  .closing strong {
+    color: var(--text-primary);
+  }
+
+  /* Deployment model label */
+  .deploy-label {
+    display: inline-block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-bottom: 12px;
+    letter-spacing: 0.3px;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 32px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Print */
+  @media print {
+    body { background: #fff; color: #1a1a1a; }
+    .header { position: static; border-bottom: 2px solid #1a1a1a; }
+    .gradient-bar { height: 2px; }
+    .section { page-break-inside: avoid; }
+    p, li, td { color: #333; }
+    h2 { color: #1a1a1a; }
+    .closing { background: #f5f5f5; border-color: #ddd; }
+    .closing p, .closing strong { color: #1a1a1a; }
+    thead th { background: #eee; color: #1a1a1a; }
+    tbody td { background: #fff !important; color: #333; border-color: #ddd; }
+  }
+
+  @media (max-width: 768px) {
+    .container { padding: 0 20px; }
+    .header-inner { padding: 0 20px; }
+    .hero { padding: 48px 0 40px; }
+    .hero h1 { font-size: 28px; }
+    .section { padding: 40px 0; }
+    h2 { font-size: 20px; }
+    table { font-size: 13px; }
+    thead th, tbody td { padding: 10px 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="gradient-bar"></div>
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">Akka</div>
+    <div class="header-label">Platform Capabilities</div>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="hero">
+    <h1>Akka Platform &mdash; Where the Value Is</h1>
+    <p class="subtitle">An enterprise architecture perspective on what the platform delivers versus what you'd need to build and sustain internally.</p>
+  </div>
+
+  <!-- Layers -->
+  <section class="section">
+    <h2>Akka as a Unified Platform</h2>
+    <p>Akka integrates three capabilities into a single system:</p>
+    <div class="table-wrap">
+      <table class="layer-table">
+        <thead><tr><th>Capability</th><th>What it provides</th><th>Who uses it</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>SDK</strong></td>
+            <td>Programming model &mdash; event-sourced entities, key-value entities, workflows, views, endpoints. Developers write business logic against the SDK.</td>
+            <td>Application developers</td>
+          </tr>
+          <tr>
+            <td><strong>Runtime</strong></td>
+            <td>Distributed systems engine &mdash; clustering, sharding, replication, traffic steering, split-brain resolution, exactly-once processing. Built into the runtime and activated by the SDK's component model. No application code required.</td>
+            <td>Activated automatically</td>
+          </tr>
+          <tr>
+            <td><strong>Platform</strong></td>
+            <td>Infrastructure-as-Code and operational automation &mdash; purpose-built for running Akka applications. Provisions, configures, monitors, patches, scales, and recovers the infrastructure that the Runtime runs on.</td>
+            <td>Operations / Akka SRE</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>The Platform is where the operational value compounds. It takes the Runtime's capabilities and ensures they work in production, across regions, continuously, without dedicated internal teams.</p>
+    <p>The rest of this document focuses on the Platform layer and what it delivers.</p>
+  </section>
+
+  <!-- 1. Infrastructure Operations -->
+  <section class="section">
+    <h2><span class="section-num">1.</span> Infrastructure Operations</h2>
+    <p>The Platform supports two deployment models: <strong>BYOK8s</strong> (Bring Your Own Kubernetes), where the Platform runs within your existing Kubernetes clusters and connects to your managed databases, and <strong>BYOC</strong> (Bring Your Own Cloud), where the Platform also provisions and manages the Kubernetes clusters, databases, and networking within your cloud account. In both models, you retain custodial ownership of all cloud resources.</p>
+    <p>In a BYOK8s deployment &mdash; which aligns with organizations that have existing Kubernetes investment and infrastructure governance &mdash; you retain full ownership of the underlying clusters, networking, storage, and database instances. The Platform manages the Akka layer on top, absorbing the day-2 operational work:</p>
+    <div class="table-wrap">
+      <table class="ops-table">
+        <thead><tr><th>Concern</th><th>What the Platform handles</th><th>Without the Platform</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><strong>Scaling</strong></td>
+            <td>Auto-elasticity of Akka application instances within Kubernetes based on real-time load. No pod tuning or scaling runbooks.</td>
+            <td>You size, monitor, and adjust application scaling yourself.</td>
+          </tr>
+          <tr>
+            <td><strong>Patching</strong></td>
+            <td>Live JVM and Akka platform patches without triggering application redeployment. Kubernetes major version and database upgrades are coordinated jointly.</td>
+            <td>Every platform patch means repackaging and redeploying every service.</td>
+          </tr>
+          <tr>
+            <td><strong>Certificate management</strong></td>
+            <td>Automated rotation of service certs, intermediate CAs, and encryption keys across all regions.</td>
+            <td>You deploy and operate cert-manager, build rotation automation, handle cross-region CA hierarchies.</td>
+          </tr>
+          <tr>
+            <td><strong>Failover coordination</strong></td>
+            <td>Cross-region failover with data consistency verification &mdash; coordinated by the Federation Plane.</td>
+            <td>You write and test failover runbooks. An on-call engineer executes them under pressure.</td>
+          </tr>
+          <tr>
+            <td><strong>Persistence management</strong></td>
+            <td>Akka's encrypted event store managed, sharded, and scaled within your database instances. Benchmarked to &gt;1M writes/sec at &lt;20ms latency.</td>
+            <td>You manage Akka's storage layer yourself &mdash; schema management, sharding, performance tuning.</td>
+          </tr>
+          <tr>
+            <td><strong>Deployments</strong></td>
+            <td>Zero-downtime rolling updates with side-by-side version transitions, even during data model changes.</td>
+            <td>You build deployment pipelines with blue-green or canary logic and test them against your data model.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Multi-Region Operations</h3>
+    <p>The Akka Runtime provides multi-region replication as a built-in capability &mdash; automatic state replication with configurable primary selection (follow-the-writer or pinned), CRDT-based conflict resolution when regions reconnect, sub-one-minute failover with zero data loss (zero-byte RPO), and regional data pinning for sovereignty requirements. The application code is identical whether it runs in one region or four.</p>
+    <p>The Platform adds the operational layer that makes multiple regions work as a coherent system. It configures cross-region mTLS with per-region root CAs and automated certificate rotation. It deploys traffic steering proxies and Akka operators for elasticity, routing, and service management. It coordinates failover with data consistency verification. It handles the cross-region backup replication that makes zero-byte RPO achievable &mdash; whether within your existing Kubernetes infrastructure (BYOK8s) or in Platform-provisioned clusters (BYOC).</p>
+    <p>Without the Platform, provisioning, connecting, securing, and operating this infrastructure across regions falls on internal teams. That's where the multi-year engineering programme lives.</p>
+
+    <p>The RACI is explicit: Akka is responsible and accountable for the platform layer within Kubernetes &mdash; application scaling, platform maintenance, availability monitoring, Akka platform backups, and disaster recovery of Akka services. In BYOK8s, the customer is responsible for the underlying infrastructure (Kubernetes clusters, database instances, networking); in BYOC, the Platform provisions and manages that infrastructure as well. In both models, the customer owns application code, application-level patching, and IAM/compliance policies. Kubernetes major versions and database major upgrades are coordinated between both parties.</p>
+    <p>The net effect is that the Akka workload does not require a dedicated SRE team.</p>
+  </section>
+
+  <!-- 2. Security -->
+  <section class="section">
+    <h2><span class="section-num">2.</span> Security</h2>
+    <p>The Runtime provides application-level security (mTLS between services, endpoint ACLs, JWT integration). The Platform complements this with infrastructure-level security:</p>
+    <ul>
+      <li><strong>Zero-trust remote access</strong>: A zero-trust proxy deployed in the customer's cluster provides cryptographic machine identity for all cross-region management. Private Kubernetes API endpoints remain private &mdash; no public exposure, no IP whitelisting. Encrypted gRPC-over-mTLS reverse tunnels between Federation Plane and every region. Akka SRE access is scoped via RBAC integrated with customer SSO.</li>
+      <li><strong>Certificate lifecycle</strong>: Per-region root CAs, automated intermediate CA rotation, per-service certificate issuance &mdash; all managed by the Platform without operator intervention.</li>
+      <li><strong>Encryption at rest</strong>: All persisted data encrypted within the Akka persistence layer. Host-level encryption remains under customer control at the infrastructure layer.</li>
+      <li><strong>Least-privilege IAM</strong>: Scoped roles (Deployment, Editor, Viewer, SRE) with auditable permissions. Integrates with Entra ID and enterprise identity systems.</li>
+      <li><strong>Continuous vulnerability scanning</strong>: Akka InfoSec scans source repositories and running environments. Reports shared via trust center.</li>
+      <li><strong>Private connectivity</strong>: VNet Peering with NAT Gateways enables fully private region-to-region communication without internet-facing traffic.</li>
+    </ul>
+    <p>Assembling this from individual components (cert-manager, Vault, zero-trust proxies, policy engines, network policies, identity federation) is achievable. Keeping it operational, patched, auditable, and regulator-ready across multiple regions is where the cost compounds. The Platform delivers this as a maintained, integrated system.</p>
+  </section>
+
+  <!-- 3. Observability -->
+  <section class="section">
+    <h2><span class="section-num">3.</span> Observability</h2>
+    <p>Generic observability tooling doesn't understand Akka's internals. The Platform ships an OpenTelemetry-based stack that does:</p>
+    <ul>
+      <li><strong>Runtime-aware metrics</strong> &mdash; replication lag, replication throughput, replication errors, consumer lag, entity data ops. These are metrics that generic Kubernetes monitoring cannot provide.</li>
+      <li><strong>eBPF-based signal collection</strong> for logs, network flows, and traces &mdash; collected at the kernel level without application instrumentation.</li>
+      <li><strong>Centralized Federation Plane dashboard</strong> aggregating platform telemetry from all regions with 60-day retention.</li>
+    </ul>
+    <p>The observability pipeline is built on OpenTelemetry, meaning it integrates natively with OTel-compatible backends. Customer application logs stay within the customer's environment &mdash; never shipped to the Federation Plane. Platform telemetry can be exported to the customer's existing observability tools via OTLP, Splunk HEC, Azure Monitor, or Google Cloud Monitoring.</p>
+    <p>The value is that this pipeline is pre-integrated with the Runtime's internals and maintained as part of the operational contract &mdash; not a separate system to build and operate.</p>
+  </section>
+
+  <!-- 4. Disaster Recovery -->
+  <section class="section">
+    <h2><span class="section-num">4.</span> Disaster Recovery</h2>
+    <p>The Runtime provides the replication and consistency mechanisms. The Platform wraps them in a complete DR strategy:</p>
+    <ul>
+      <li><strong>Application data</strong>: Continuous point-in-time recovery with cross-region snapshot replication (RPO &lt; 5 minutes). Multi-region Runtime replication provides sub-one-minute failover for active regions.</li>
+      <li><strong>Akka platform state</strong>: Automated backups of Kubernetes resources to customer's cloud object storage. Akka restores platform services; in BYOK8s the customer restores the database from point-in-time recovery, in BYOC this is managed by the Platform.</li>
+      <li><strong>Federation Plane</strong>: PIT database recovery, multi-region storage (RPO &lt; 5 minutes, RTO ~6 hours).</li>
+    </ul>
+    <p>Recovery from regional failure is a coordinated procedure: Akka restores platform services from backup, Federation Plane re-projects resources. In BYOK8s, the customer restores the database from PIT backup; in BYOC, the Platform handles this. The split is clear and rehearsed, with 24/7 incident response from Akka's SRE team.</p>
+    <p>The alternative is designing this yourself: choosing backup tools, building cross-region storage replication, writing and testing runbooks, training on-call teams, and conducting regular DR exercises. Each of those is a project. Together they're a programme.</p>
+  </section>
+
+  <!-- 5. Regulatory Readiness -->
+  <section class="section">
+    <h2><span class="section-num">5.</span> Regulatory Readiness</h2>
+    <p>The Platform is already deployed and regulator-approved at financial institutions. This means:</p>
+    <ul>
+      <li>The operational model has passed regulatory scrutiny for financial services</li>
+      <li>Audit trails are architectural (immutable event journals from the Runtime, trace ID correlation, access-control reporting from the Platform)</li>
+      <li>Data sovereignty controls (regional pinning) are a Runtime configuration option, operationalized by the Platform's regional infrastructure</li>
+      <li>Quarterly access-control reports and SIEM monitoring are part of the operational contract</li>
+      <li>The shared responsibility model is documented and auditable</li>
+    </ul>
+    <p>For a regulated organization, the compliance burden of a platform that's already been through this process is materially different from one that hasn't.</p>
+  </section>
+
+  <!-- 6. Time to Production -->
+  <section class="section">
+    <h2><span class="section-num">6.</span> Time to Production</h2>
+    <p>The bootstrap path for a new Azure region:</p>
+
+    <h3><span class="deploy-label">BYOK8s</span> Customer provisions infrastructure, Akka manages the platform layer</h3>
+    <ol>
+      <li>Capacity planning with Akka solutions architect</li>
+      <li>Customer provisions Kubernetes cluster, database, networking, and DNS subdomain zones</li>
+      <li>Customer seeds database credentials into Akka namespaces and configures certificate issuer</li>
+      <li>Customer installs zero-trust proxy (provided by Akka) for secure Federation Plane connectivity</li>
+      <li>Akka configures the cluster as an Akka application plane region, sets up internal observability</li>
+      <li>Smoke tests; region is handed over and live</li>
+    </ol>
+
+    <h3><span class="deploy-label">BYOC</span> Platform provisions and manages infrastructure within the customer's cloud account</h3>
+    <ol>
+      <li>Customer runs bootstrap utility (provided by Akka) to set up IAM roles and permissions</li>
+      <li>Share credentials with Akka; remote provisioning begins</li>
+      <li>Customer configures DNS records</li>
+      <li>Smoke tests; region is live</li>
+    </ol>
+
+    <p>Adding a second region for multi-region HA follows the same process. The application code doesn't change &mdash; the Runtime handles replication, the Platform handles the operational layer.</p>
+  </section>
+
+  <!-- 7. Production Readiness -->
+  <section class="section">
+    <h2><span class="section-num">7.</span> Production Readiness</h2>
+    <p>A common cost in enterprise projects is the gap between "application works in dev" and "application is production-ready." Day-2 concerns &mdash; scaling, monitoring, alerting, patching, backup, failover, certificate rotation, security hardening &mdash; are typically addressed late in the project and require significant engineering and operations effort.</p>
+    <p>With the Platform, these concerns are resolved from day one. The infrastructure is already configured for production: observability is collecting metrics before the first deployment, certificates are rotating, backups are running, scaling policies are active, and failover procedures are in place. There is no separate production-readiness workstream because the Platform's operational baseline <em>is</em> the production configuration.</p>
+    <p>This compresses the timeline from development to production and eliminates the risk of day-2 gaps discovered post-launch.</p>
+  </section>
+
+  <!-- Closing -->
+  <div class="closing">
+    <p><strong>The core proposition</strong>: the SDK gives developers a productive programming model. The Runtime gives that model distributed systems capabilities &mdash; replication, clustering, failover, consistency. The Platform ensures those capabilities work in production by provisioning, operating, securing, monitoring, patching, and recovering the infrastructure underneath. The infrastructure layer is where the real cost, risk, and staffing burden lives &mdash; and that's precisely what the Platform absorbs.</p>
+  </div>
+
+</main>
+
+<footer class="footer">
+  <div class="container">Akka &mdash; Confidential</div>
+</footer>
+
+<div class="gradient-bar"></div>
+
+</body>
+</html>
